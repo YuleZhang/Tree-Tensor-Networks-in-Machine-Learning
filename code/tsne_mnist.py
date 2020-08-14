@@ -8,7 +8,8 @@ import numpy as np
 import pickle
 from matplotlib.backends.backend_pdf import PdfPages
 from sklearn.manifold import TSNE
-data_folder = "./data/mnist/"
+from tree_tensor_network_mnist import TreeTensorNetwork
+data_folder = "./"
 
 n_epochs = 3
 
@@ -17,7 +18,7 @@ bond_inner = 3
 bond_label = 2
 
 n_class = 2
-n_train_each = 900
+n_train_each = 90
 n_train = n_train_each * n_class
 
 n_test_each = 1000
@@ -35,7 +36,7 @@ LAB = np.concatenate((LAB1, LAB2), axis=0)
 print("loading data")
 input = open(data_folder + 'tsne.pkl', 'rb')
 ttn = pickle.load(input)
-
+print(ttn)
 
 #%%
 LAB1 = [0] * n_train_each
@@ -133,6 +134,6 @@ def sweep3(contraction, per, lear, tags=LAB):
 
 
 for i in range(5):
-    plot(ttn.contracted, i, 60, 400)
+    plot(ttn[0].contracted, i, 60, 400)
 
 plt.show()

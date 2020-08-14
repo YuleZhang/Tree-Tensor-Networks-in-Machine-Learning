@@ -7,6 +7,7 @@ import numpy as np
 import pickle
 
 data_folder = "/export/tree_tn/data/mnist/"
+data_folder = "./code/samples/"
 n_epochs = 3
 
 bond_data=[2,2,2,2,2,2,2,2,2,2]
