@@ -21,13 +21,13 @@ def load_mnist_train(path, kind='train'):
     for idx in range(len(images)):
         org_img = images[idx].reshape(28,28)
         im = Image.fromarray(org_img)
-        resized_im = im.resize((16, 16))
-        new_img = np.asarray(resized_im)
+        resized_im = im.resize((16, 16)) 
+        new_img = np.asarray(resized_im) / 255.0
         # 注意list每阶的维度一样才能表示成大张量
         # 详细见https://stackoverflow.com/questions/52097119/incorrect-shape-of-2d-numpy-array
-        if len(lb_dic[labels[idx]]) < 90:
+        if len(lb_dic[labels[idx]]) < 5400:
             lb_dic[labels[idx]].append(new_img)
-    result=np.array([np.array(x) for x in lb_dic.values()])
+    result=np.array([np.array(x) for x in lb_dic.values()]) 
     result=result.swapaxes(2,0).swapaxes(3,1)
     print(result.shape)
     mat_dic = {}
@@ -50,8 +50,8 @@ def load_mnist_test(path, kind='t10k'):
     for idx in range(len(images)):
         org_img = images[idx].reshape(28,28)
         im = Image.fromarray(org_img)
-        resized_im = im.resize((16, 16))
-        new_img = np.asarray(resized_im)
+        resized_im = im.resize((16, 16)) 
+        new_img = np.asarray(resized_im) / 255.0
         if len(lb_dic[labels[idx]]) < 800:
             lb_dic[labels[idx]].append(new_img)
     result=np.array([np.array(x) for x in lb_dic.values()])

@@ -103,34 +103,34 @@ def plot(contraction,  which_layer, per, lear, tags=LAB):
 
 
 #%%
-def sweep(contraction, which_layer, per, tags=LAB):
+# def sweep(contraction, which_layer, per, tags=LAB):
 
-    L = [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750]
-    f = []
-    for i in range(0, len(L)):
-        f = plot(contraction, i, per, L[i], tags=LAB)
+#     L = [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750]
+#     f = []
+#     for i in range(0, len(L)):
+#         f = plot(contraction, i, per, L[i], tags=LAB)
 
-    return f
-#%%
-
-
-def sweep2(contraction, which_layer, tags=LAB):
-    G = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140]
-    q = []
-    for i in range(0, len(G)):
-        q = sweep(contraction, which_layer, G[i], tags=LAB)
-
-    return q
-#%%
+#     return f
+# #%%
 
 
-def sweep3(contraction, per, lear, tags=LAB):
+# def sweep2(contraction, which_layer, tags=LAB):
+#     G = [30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140]
+#     q = []
+#     for i in range(0, len(G)):
+#         q = sweep(contraction, which_layer, G[i], tags=LAB)
 
-    m = []
-    for i in range(1, 5):
-        m = sweep2(contraction, i, tags=LAB)
+#     return q
+# #%%
 
-    return m
+
+# def sweep3(contraction, per, lear, tags=LAB):
+
+#     m = []
+#     for i in range(1, 5):
+#         m = sweep2(contraction, i, tags=LAB)
+
+#     return m
 
 
 for i in range(5):

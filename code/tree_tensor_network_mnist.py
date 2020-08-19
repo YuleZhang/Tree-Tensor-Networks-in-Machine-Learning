@@ -7,11 +7,10 @@ from itertools import product
 from numpy import linalg as la
 from sklearn import preprocessing
 
-
 class TreeTensorNetwork(object):
 
     def __init__(self, data, labels, bond_data, bond_inner, bond_label, layer_units):
-        self.flag_contract = np.zeros((5, 8, 8), dtype=np.float64)
+        self.flag_contract = np.zeros((5, 8, 8), dtype=np.float64) # 从i=1层开始更新
         # initialize contraction results
         self.layer_units = layer_units
 
@@ -20,6 +19,7 @@ class TreeTensorNetwork(object):
         self.contracted = []
 
         self.contracted.append(data)
+        # 给出input层数据data,其余层初始化为0
         for i in range(1, 5):
             self.contracted.append(
                 [[0 for _ in range(self.layer_units[i])] for _ in range(self.layer_units[i])])
@@ -30,7 +30,8 @@ class TreeTensorNetwork(object):
         self.bond_data = bond_data
         self.labels = labels
         self.n_train = data[0][0].shape[1]
-
+        # 初始化张量网络，i==1表示输入层，i==4表示输出层，i==其他表示中间层
+        # 我终于想明白啦！！！原来它每一层是length*width的格式，输入层是16*16的图片，第一层是8*8的图片以此类推，直到1*1
         for i in range(1, 5):
             self.tn_layers.append([])
             for j in range(self.layer_units[i]):
@@ -39,25 +40,45 @@ class TreeTensorNetwork(object):
                     if i == 1:
                         temp = np.random.random(
                             (self.bond_data, self.bond_data, self.bond_data, self.bond_data, self.bond_inner))
-                    elif i == 4:
+                    elif i == 4:    
                         temp = np.random.random(
                             (self.bond_inner, self.bond_inner, self.bond_inner, self.bond_inner, self.bond_label))
                     else:
                         temp = np.random.random(
                             (self.bond_inner, self.bond_inner, self.bond_inner, self.bond_inner, self.bond_inner))
+                    # labels表示物理指标，后面不再赘述
                     self.tn_layers[i][j].append(
                         tn.Tensor(temp, labels=["1", "2", "3", "4", "up"]))
         # return self.tn_layers
-
+    # 张量指标收缩
     def contract_local(self, tensor1, tensor2, tensor3, tensor4, Num):
         bond = tensor1.shape[0]
         if len(tensor1.shape) == 2 and len(tensor2.shape) == 2 and len(tensor3.shape) == 2 and len(tensor4.shape) == 2:
             tensor_result = tn.random_tensor(bond, bond, bond, bond, Num, labels=[
                                              'a', 'b', 'c', 'd', 'down'])
-
+            # 这里张量的"*"表示列表对应位置元素相乘
             for i, j, k, l in product(range(bond), range(bond), range(bond), range(bond)):
                 tensor_result.data[i, j, k, l, :] = tensor1.data[i, :] * tensor2.data[j, :] * tensor3.data[k,
                                                                                                            :] * tensor4.data[l, :]
+                # fir_tn = tensor1.data[0, :]
+                # x = fir_tn.shape
+                # sec_tn = tensor2.data[0, :]
+                # y = sec_tn.shape
+                # check_tensor = tensor1.data[0, :] * tensor2.data[0, :]
+                # z = check_tensor.shape
+                # print(sum(check_tensor==1))
+            # for i in range(bond):
+            #     for j in range(bond):
+            #         for k in range(bond):
+            #             for l in range(bond):
+            #                 tensor_result.data[i, j, k, l, :] = tensor1.data[i, :] * tensor2.data[j, :] * tensor3.data[k,
+            #                                                                                             :] * tensor4.data[l, :]
+            #                 fir_tn = tensor1.data[i, :]
+            #                 x = fir_tn.shape
+            #                 sec_tn = tensor4.data[l, :]
+            #                 y = sec_tn.shape
+            #                 # check_tensor = tensor1.data[i, :] * tensor2.data[l, :]
+            #                 z = tensor_result.data[i, j, k, l, :].shape
 
         else:
             tensor_result = tn.random_tensor(bond, bond, bond, bond, self.bond_inner, Num, labels=[
@@ -98,7 +119,7 @@ class TreeTensorNetwork(object):
             tensor_result.data[i, j, k, :] = tensor1.data[i,
                                                           :] * tensor2.data[j, :] * tensor3.data[k, :]
         return tensor_result
-
+    #
     def contract_unit(self, tensor0, tensor1, tensor2, tensor3, tensor4, Num):
         temp = self.contract_local(tensor1, tensor2, tensor3, tensor4, Num)
         tensor_result = tn.contract(
@@ -126,20 +147,24 @@ class TreeTensorNetwork(object):
         return tensor_result
 
     def update_singletensor(self, c_i, c_j, c_k):
-
+        # c_i为层数，c_j为张量位置
         path_len = 5 - c_i
         path = [[c_i, c_j, c_k]]
         tem_c_j = c_j
         tem_c_k = c_k
         for i in range(1, path_len):
+            # //表示整数除法,返回int型
             tem_c_j = tem_c_j // 2
             tem_c_k = tem_c_k // 2
             path.append([c_i + i, tem_c_j, tem_c_k])
-
+        # 更新contracted，即各层的张量
         for i in range(1, 5):
             if i == c_i:
+                # 遍历长宽进行更新
                 for j, k in product(range(self.layer_units[i]), range(self.layer_units[i])):
                     if (self.flag_contract[i, j, k] == 0) and ((j != c_j) or (k != c_k)):
+                        x =  self.contracted[i - 1][2 * j][2 * k]
+                        y = self.contracted[i - 1][2 * j][2 * k]
                         self.contracted[i][j][k] = self.contract_unit(self.tn_layers[i][j][k], self.contracted[i - 1][2 * j][2 * k], self.contracted[(
                             i - 1)][2 * j][2 * k + 1], self.contracted[i - 1][2 * j + 1][2 * k], self.contracted[i - 1][2 * j + 1][2 * k + 1], self.n_train)
                         self.flag_contract[i, j, k] = 1
@@ -194,6 +219,7 @@ class TreeTensorNetwork(object):
                                 self.flag_contract[i, j, k] = 1
                             if i < 4:
                                 self.flag_contract[i + 1, j // 2, k // 2] = 0
+        # 计算环境张量E
         if c_i != 4:
 
             bond = self.contracted[c_i][c_j][c_k].shape[0]             
@@ -210,11 +236,12 @@ class TreeTensorNetwork(object):
         else:
             tensor_environment = tn.contract(
                 self.contracted[4][0][0], self.labels, "down", "up")
-
+        # 根据不同层数更新tn_layers
         if c_i == 1:
             matrix = np.reshape(tensor_environment.data, (self.bond_data *
                                                           self.bond_data * self.bond_data * self.bond_data, self.bond_inner))
             u, sigma, vt = la.svd(matrix, 0)
+            # 更新T张量
             self.tn_layers[c_i][c_j][c_k].data = np.reshape(
                 np.dot(u, vt), (self.bond_data, self.bond_data, self.bond_data, self.bond_data, self.bond_inner))
         else:
@@ -234,6 +261,7 @@ class TreeTensorNetwork(object):
         # compute the training accuracy-------------------------------------------
         j = c_j
         k = c_k
+        # 从当前层到最后一层更新对应位置张量
         for i in range(c_i, 5):
             self.contracted[i][j][k] = self.contract_unit(self.tn_layers[i][j][k],
                                                           self.contracted[i -
@@ -247,22 +275,25 @@ class TreeTensorNetwork(object):
             k = k // 2
 
         temp = tn.contract(self.contracted[4][0][0], self.labels, "up", "down")
+        # 求矩阵的迹
         temp.trace("up", "down")
         acc = temp.data / self.n_train
         return acc
-
+    # 对张量网络进行训练
     def train(self, n_epochs):
         acc_train = 0
         for t in range(1, n_epochs + 1):
             print("epochs:", t)
             for i in range(1, 5):
                 #print("layer:", i)
+                # 图片的长
                 for j in range(self.layer_units[i]):
                     # print([j])
+                    # 图片的宽
                     for k in range(self.layer_units[i]):
                         # print(i,j,k)
-                        acc_train = self.update_singletensor(i, j, k)
-                        acc_train = round(acc_train, 3)
+                        acc_train = self.update_singletensor(i, j, k) # 更新第i层，第j行，第k列
+                        acc_train = round(acc_train, 3) # 保留三位小数
             print("training average inner product:", acc_train)
         return acc_train
 

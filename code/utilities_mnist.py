@@ -11,14 +11,19 @@ from PIL import Image
 def load_train_data(filename, n_train, n_train_each, bond_label, bond_data, current_class):
     image = sio.loadmat(filename)
     image_group = image['Data_group']
-    data_group = np.zeros(
+    data_group = np.zeros(                                         
         (16, 16, 10, image_group.shape[3], bond_data), dtype=np.float64)
-
     # 批量对像素进行特征映射
+    # test = 0.8
+    # test_vec = np.zeros(bond_data)
     for i in range(bond_data):
         data_group[:, :, :, :, i] = (len([c for c in combinations(range(bond_data - 1), i)]) ** 0.5) * \
             np.cos((image_group) * (np.pi / 2)) ** (bond_data - (i + 1)) * np.sin(
             (image_group) * (np.pi / 2)) ** i                   # dg[::::0]=cos((pi/2)x) dg[::::1]=sin((pi/2)x)
+
+        # test_vec[i] =  (len([c for c in combinations(range(bond_data - 1), i)]) ** 0.5) * \
+        #     np.cos((test) * (np.pi / 2)) ** (bond_data - (i + 1)) * np.sin(
+        #     (test) * (np.pi / 2)) ** i                   # dg[::::0]=cos((pi/2)x) dg[::::1]=sin((pi/2)x)
 
     train_data = np.zeros((16, 16, bond_data, n_train), dtype=np.float64)
     label_data = np.zeros((n_train, bond_label), dtype=np.float64)
@@ -28,7 +33,7 @@ def load_train_data(filename, n_train, n_train_each, bond_label, bond_data, curr
 
     cc = set([current_class]) # 待去除的类别
     rest = set(range(0, 10)) - cc  # 剩下的类别
-
+    
     for k, l, m in product(range(bond_data), range(9), range(int(n_train_each / 9))):
         train_data[:, :, k, n_train_each + l *
                    int(n_train_each / 9) + m] = data_group[:, :, list(rest)[l], m, k]

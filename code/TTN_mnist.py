@@ -9,16 +9,17 @@ from utilities_mnist import load_train_data
 from utilities_mnist import load_test_data
 
 
+
 data_folder = "./code/samples/"
 n_epochs = 3
 
-bond_data = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
-bond_inner = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+bond_data = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # 待分解张量的阶数
+bond_inner = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # 辅助指标的维数
 bond_label = 2
 
-n_class = 2  # Yes or No
+n_class = 2
 n_train_single = 10
-n_train_each = n_train_single * 9
+n_train_each = n_train_single * 540
 n_train = n_train_each * n_class
 print(n_train)
 
@@ -42,6 +43,7 @@ acc_test2 = [0 for col in range(10)]
 for i in range(10):
     print("bond_data:", bond_data[i])
     print("bond_inner:", bond_inner[i])
+    # 每次读取不同的标签
     data, labels = load_train_data(
         data_folder + "train.mat", n_train, n_train_each, bond_label, bond_data[i], i)
     data_test, labels_test = load_train_data(
