@@ -14,16 +14,10 @@ def load_train_data(filename, n_train, n_train_each, bond_label, bond_data, curr
     data_group = np.zeros(                                         
         (16, 16, 10, image_group.shape[3], bond_data), dtype=np.float64)
     # 批量对像素进行特征映射
-    # test = 0.8
-    # test_vec = np.zeros(bond_data)
     for i in range(bond_data):
         data_group[:, :, :, :, i] = (len([c for c in combinations(range(bond_data - 1), i)]) ** 0.5) * \
             np.cos((image_group) * (np.pi / 2)) ** (bond_data - (i + 1)) * np.sin(
             (image_group) * (np.pi / 2)) ** i                   # dg[::::0]=cos((pi/2)x) dg[::::1]=sin((pi/2)x)
-
-        # test_vec[i] =  (len([c for c in combinations(range(bond_data - 1), i)]) ** 0.5) * \
-        #     np.cos((test) * (np.pi / 2)) ** (bond_data - (i + 1)) * np.sin(
-        #     (test) * (np.pi / 2)) ** i                   # dg[::::0]=cos((pi/2)x) dg[::::1]=sin((pi/2)x)
 
     train_data = np.zeros((16, 16, bond_data, n_train), dtype=np.float64)
     label_data = np.zeros((n_train, bond_label), dtype=np.float64)

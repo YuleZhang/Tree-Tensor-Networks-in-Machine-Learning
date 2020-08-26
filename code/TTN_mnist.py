@@ -14,20 +14,21 @@ data_folder = "./code/samples/"
 n_epochs = 3
 
 bond_data = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # 待分解张量的阶数
+# bond_data = [9, 10, 9, 10, 10, 9,9,9,9,8]
 bond_inner = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # 辅助指标的维数
+# bond_inner = [9, 10, 9,10, 10, 9, 9, 9, 9, 8]
 bond_label = 2
 
 n_class = 2
 n_train_single = 10
-n_train_each = n_train_single * 540
+n_train_each = n_train_single * 9
 n_train = n_train_each * n_class
 print(n_train)
 
-n_test_each = 800
+n_test_each = 80
 n_test = n_test_each * 10
 
 layer_units = [16, 8, 4, 2, 1]
-
 
 # build tensor network---------------------------------------------------
 print("building tensor network")
@@ -60,7 +61,7 @@ for i in range(10):
     # Testing for each classifier
     print("Testing number", i, "th binary classifier:")
     acc_test1[i], acc_test2[i] = ttn[i].test(data_test, labels_test)
-    print("testing accuracy", acc_test2[i])
+    print("testing accuracy1 {0}, testing accuarcy2 {1}".format(acc_test1[i], acc_test2[i]))
 
     pickle.dump(ttn, output)
 output.close()

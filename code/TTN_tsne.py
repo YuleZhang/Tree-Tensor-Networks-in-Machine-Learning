@@ -19,7 +19,7 @@ n_train_single=10
 n_train_each = n_train_single*9
 n_train = n_train_each * n_class
 
-n_test_each = 800
+n_test_each = 80
 n_test = n_test_each * 10
 
 layer_units = [16, 8, 4, 2, 1]

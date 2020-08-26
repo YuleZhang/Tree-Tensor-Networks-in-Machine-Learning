@@ -57,9 +57,9 @@ class TreeTensorNetwork(object):
             tensor_result = tn.random_tensor(bond, bond, bond, bond, Num, labels=[
                                              'a', 'b', 'c', 'd', 'down'])
             # 这里张量的"*"表示列表对应位置元素相乘
-            for i, j, k, l in product(range(bond), range(bond), range(bond), range(bond)):
-                tensor_result.data[i, j, k, l, :] = tensor1.data[i, :] * tensor2.data[j, :] * tensor3.data[k,
-                                                                                                           :] * tensor4.data[l, :]
+            # for i, j, k, l in product(range(bond), range(bond), range(bond), range(bond)):
+            #     tensor_result.data[i, j, k, l, :] = tensor1.data[i, :] * tensor2.data[j, :] * tensor3.data[k,
+            #                                                                                                :] * tensor4.data[l, :]
                 # fir_tn = tensor1.data[0, :]
                 # x = fir_tn.shape
                 # sec_tn = tensor2.data[0, :]
@@ -67,18 +67,18 @@ class TreeTensorNetwork(object):
                 # check_tensor = tensor1.data[0, :] * tensor2.data[0, :]
                 # z = check_tensor.shape
                 # print(sum(check_tensor==1))
-            # for i in range(bond):
-            #     for j in range(bond):
-            #         for k in range(bond):
-            #             for l in range(bond):
-            #                 tensor_result.data[i, j, k, l, :] = tensor1.data[i, :] * tensor2.data[j, :] * tensor3.data[k,
-            #                                                                                             :] * tensor4.data[l, :]
-            #                 fir_tn = tensor1.data[i, :]
-            #                 x = fir_tn.shape
-            #                 sec_tn = tensor4.data[l, :]
-            #                 y = sec_tn.shape
-            #                 # check_tensor = tensor1.data[i, :] * tensor2.data[l, :]
-            #                 z = tensor_result.data[i, j, k, l, :].shape
+            for i in range(bond):
+                for j in range(bond):
+                    for k in range(bond):
+                        for l in range(bond):
+                            tensor_result.data[i, j, k, l, :] = tensor1.data[i, :] * tensor2.data[j, :] * tensor3.data[k,
+                                                                                                        :] * tensor4.data[l, :]
+                            fir_tn = tensor1.data[i, :]
+                            x = fir_tn.shape
+                            sec_tn = tensor4.data[l, :]
+                            y = sec_tn.shape
+                            # check_tensor = tensor1.data[i, :] * tensor2.data[l, :]
+                            z = tensor_result.data[i, j, k, l, :].shape
 
         else:
             tensor_result = tn.random_tensor(bond, bond, bond, bond, self.bond_inner, Num, labels=[
@@ -330,13 +330,16 @@ class TreeTensorNetwork(object):
         # option 2
         count = 0
         for i in range(Num):
-            x = np.argmax(self.contracted[4][0][0].data[:, i])
+            # 这里目前因为负数存在问题
+            x = np.argmax(abs(self.contracted[4][0][0].data[:, i]))
+            print(np.array(self.contracted[4][0][0].data).shape)
+            print(np.array(self.contracted[4][0][0].data[:, i]))
             for j in range(2):
                 if j == x:
                     self.contracted[4][0][0].data[j, i] = 1
                 else:
                     self.contracted[4][0][0].data[j, i] = 0
-
+            print(self.contracted[4][0][0].data[:, i] == label_test_tensor.data[i, :])
             if (self.contracted[4][0][0].data[:, i] == label_test_tensor.data[i, :]).all():
                 count = count + 1
 
